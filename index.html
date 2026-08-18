@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pilaché 口コミ作成サポート</title>
+<style>
+:root{--brand:#e6a6b3;--dark:#c98090;--bg:#fff8fa;--card:#fff;--text:#332d2f;--muted:#786f72;--border:#f0d8de;--soft:#fff0f4;--success:#4f7b67;--danger:#b42318}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:720px;margin:auto;padding:18px 14px 48px}
+.hero,.card{background:var(--card);border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.055);border:1px solid rgba(0,0,0,.04)}
+.hero{padding:28px 18px;text-align:center}
+.logo{display:none}
+h1{margin:0;font-size:24px;line-height:1.45}
+.lead{color:var(--muted);font-size:14px;line-height:1.75;margin:10px 0 0}
+.privacy{display:inline-block;margin-top:14px;padding:7px 11px;border-radius:999px;background:#eef6f1;color:var(--success);font-size:12px}
+.card{margin-top:14px;padding:18px}
+.title{margin:0 0 6px;font-size:17px;font-weight:750}
+.note{margin:0 0 12px;color:var(--muted);font-size:12px}
+.stars{display:flex;justify-content:center;gap:7px;margin-top:12px}
+.star{border:0;background:transparent;color:#d8d8d8;font-size:42px;cursor:pointer;padding:0 2px}
+.star.on{color:#d99aa8}
+.rating-label{text-align:center;color:var(--muted);font-size:13px;margin-top:8px;min-height:20px}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{border:1px solid var(--border);background:#fff;border-radius:999px;padding:10px 13px;cursor:pointer;font-size:14px}
+.chip.selected{background:var(--soft);border-color:var(--brand);color:#725247;font-weight:700}
+textarea{width:100%;min-height:96px;border:1px solid var(--border);border-radius:14px;padding:13px;font:inherit;resize:vertical}
+.btn{width:100%;border:0;border-radius:14px;padding:15px 16px;font-size:16px;font-weight:750;cursor:pointer;margin-top:12px}
+.primary{background:var(--brand);color:#fff}.primary:hover{background:var(--dark)}
+.secondary{background:#fff;color:var(--dark);border:1px solid var(--brand)}
+.error,.success{min-height:22px;text-align:center;font-size:13px;margin-top:9px}.error{color:var(--danger)}.success{color:var(--success);font-weight:700}
+.result{display:none}.review{min-height:150px;padding:15px;border:1px solid #e9d8d1;border-radius:14px;background:#fffdfc;white-space:pre-wrap;line-height:1.8}
+.meta{display:flex;justify-content:space-between;margin-top:8px;color:var(--muted);font-size:12px}
+#positiveFlow,#feedbackFlow{display:none}
+.feedback-box{text-align:center;padding:12px 4px}
+.feedback-icon{width:62px;height:62px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px}
+footer{margin-top:22px;text-align:center;color:var(--muted);font-size:11px;line-height:1.7}
+
+.post-guide{
+  margin-top:14px;
+  padding:14px 15px;
+  border-radius:14px;
+  background:var(--soft);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-size:13px;
+  line-height:1.7;
+}
+.post-guide strong{
+  display:block;
+  margin-bottom:5px;
+}
+.post-guide span{
+  display:block;
+}
+
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="hero">
+<img src="pilache-logo.png" alt="Pilaché" style="width:210px;max-width:75%;height:auto;margin:0 auto 14px;display:block;">
+<h1>Pilaché<br>お客様満足度アンケート</h1>
+<p class="lead">ご体験について当てはまる内容を選ぶと、口コミ文の下書きを作成できます。</p>
+<div class="privacy">入力内容は保存・送信されません</div>
+</section>
+
+<section class="card">
+<h2 class="title">今回の満足度を教えてください</h2>
+<p class="note">星をタップしてください</p>
+<div id="stars" class="stars"></div>
+<div id="ratingLabel" class="rating-label">未選択</div>
+</section>
+
+<div id="feedbackFlow">
+<section class="card">
+<div class="feedback-box">
+<div class="feedback-icon">💬</div>
+<h2 class="title">ご回答ありがとうございます</h2>
+<p class="lead">いただいた評価は、今後のサービス向上に活かしてまいります。</p>
+</div>
+</section>
+</div>
+
+<div id="positiveFlow">
+<div id="questions"></div>
+
+<section class="card">
+<h2 class="title">特に印象に残ったこと</h2>
+<p class="note">任意入力です。口コミ文へ自然に加えます。</p>
+<textarea id="freeText" placeholder="例：自分では気づかなかった姿勢の癖を教えてもらえました"></textarea>
+</section>
+
+<button id="generateBtn" class="btn primary">口コミ文を作成する</button>
+<div id="error" class="error"></div>
+
+<section id="resultCard" class="card result">
+<h2 class="title">口コミ文の下書き</h2>
+<p class="note">実際のご体験に合わせて、自由に修正してからご利用ください。</p>
+<div id="reviewText" class="review" contenteditable="true"></div>
+<div class="meta"><span>自由に編集できます</span><span id="charCount">0文字</span></div>
+<button id="regenBtn" class="btn secondary">別の文章を作る</button>
+<button id="copyBtn" class="btn primary">文章をコピー</button>
+<div id="copyMessage" class="success"></div>
+
+<div class="post-guide">
+  <strong>口コミ投稿の流れ</strong>
+  <span>① 上の「文章をコピー」をタップ</span>
+  <span>② 下のボタンからGoogle口コミ画面を開く</span>
+  <span>③ コピーした文章を貼り付けて、内容を確認して投稿してください</span>
+</div>
+
+<button id="googleBtn" class="btn primary">Google口コミ画面を開く</button>
+</section>
+</div>
+
+<footer>このページは口コミ文作成の補助ツールです。<br>投稿内容はご自身で確認・修正のうえご利用ください。</footer>
+</main>
+
+<script>
+const GOOGLE_REVIEW_URL="https://www.google.com/search?q=Pilache+福島+ピラティス";
+
+const categories=[
+{id:"purpose",name:"今回の目的・お悩み",max:3,items:[
+["purpose_diet","ダイエット"],["purpose_waist","お腹・くびれ"],["purpose_posture","姿勢改善"],["purpose_pelvis","骨盤まわりを整えたい"],["purpose_shoulder","肩こり"],["purpose_back","腰まわり"],["purpose_bodymake","ボディメイク"],["purpose_exercise","運動不足解消"],["purpose_health","健康維持"]]},
+{id:"lesson",name:"レッスンについて",max:4,items:[
+["lesson_beginner","初めてでも安心できた"],["lesson_easy","説明が分かりやすかった"],["lesson_form","フォームを丁寧に見てもらえた"],["lesson_custom","身体に合わせて進めてもらえた"],["lesson_pace","無理のないペースだった"],["lesson_focus","気になる部位を意識できた"],["lesson_fun","楽しく取り組めた"],["lesson_effective","しっかり効いている感じがした"]]},
+{id:"staff",name:"インストラクター・スタジオ",max:4,items:[
+["staff_kind","インストラクターが優しかった"],["staff_talk","話しやすかった"],["staff_question","質問しやすかった"],["staff_support","丁寧にサポートしてもらえた"],["staff_personal","自分に合わせてアドバイスしてもらえた"],["studio_clean","清潔感があった"],["studio_calm","落ち着いた雰囲気だった"],["studio_woman","女性でも通いやすい雰囲気だった"]]},
+{id:"change",name:"感じた変化",max:4,items:[
+["change_light","身体が軽くなった"],["change_posture","姿勢を意識できた"],["change_waist","お腹まわりを意識できた"],["change_pelvis","骨盤まわりを意識できた"],["change_stretch","身体が伸びてすっきりした"],["change_inner","インナーマッスルを意識できた"],["change_mobility","身体が動かしやすくなった"],["change_refresh","リフレッシュできた"]]},
+{id:"appeal",name:"Pilachéの魅力",max:4,items:[
+["appeal_beginner","初心者でも始めやすい"],["appeal_custom","一人ひとりに合わせてくれる"],["appeal_body","身体の悩みに合わせて取り組める"],["appeal_continue","無理なく続けやすそう"],["appeal_support","丁寧に見てもらえる"],["appeal_woman","女性が通いやすい"],["appeal_calm","落ち着いて身体と向き合える"],["appeal_change","身体の変化を目指せそう"]]},
+{id:"future",name:"今後について",max:2,items:[
+["future_continue","続けて通いたい"],["future_diet","ダイエットを頑張りたい"],["future_waist","くびれづくりを頑張りたい"],["future_posture","姿勢改善を目指したい"],["future_body","身体をもっと変えたい"],["future_health","健康のために続けたい"],["future_recommend","友人にも勧めたい"]]}
+];
+
+const phrases={
+purpose_diet:["ダイエットを目的に体験しました。"],purpose_waist:["お腹まわりやくびれが気になり体験しました。"],purpose_posture:["姿勢を整えたいと思い体験しました。"],purpose_pelvis:["骨盤まわりを整えたくて体験しました。"],purpose_shoulder:["肩まわりが気になり体験しました。"],purpose_back:["腰まわりが気になり体験しました。"],purpose_bodymake:["ボディメイクを目的に体験しました。"],purpose_exercise:["運動不足を解消したくて体験しました。"],purpose_health:["健康維持のために体験しました。"],
+lesson_beginner:["初めてでも安心して参加できました。"],lesson_easy:["説明が分かりやすく、動きのポイントも理解しやすかったです。"],lesson_form:["フォームを丁寧に確認してもらえました。"],lesson_custom:["その日の身体の状態に合わせて進めてもらえました。"],lesson_pace:["無理のないペースで取り組めました。"],lesson_focus:["気になる部位を意識しながら身体を動かせました。"],lesson_fun:["楽しみながら取り組めました。"],lesson_effective:["無理のない動きでも、しっかり効いている感覚がありました。"],
+staff_kind:["インストラクターの方が優しく、安心感がありました。"],staff_talk:["話しやすい雰囲気で、リラックスして参加できました。"],staff_question:["分からないことも質問しやすかったです。"],staff_support:["一つひとつ丁寧にサポートしてもらえました。"],staff_personal:["自分の身体に合わせてアドバイスしてもらえたのが良かったです。"],studio_clean:["スタジオは清潔感があり、気持ちよく利用できました。"],studio_calm:["落ち着いた雰囲気で、自分の身体に集中できました。"],studio_woman:["女性でも通いやすい雰囲気だと感じました。"],
+change_light:["レッスン後は身体が軽く感じました。"],change_posture:["普段の姿勢を意識するきっかけになりました。"],change_waist:["お腹まわりをしっかり使っている感覚がありました。"],change_pelvis:["骨盤まわりの動きを意識できました。"],change_stretch:["身体が伸びて、終わった後はすっきりしました。"],change_inner:["インナーマッスルを意識して動くことができました。"],change_mobility:["身体が動かしやすくなったように感じました。"],change_refresh:["身体だけでなく気分もリフレッシュできました。"],
+appeal_beginner:["初心者でも始めやすいところがPilachéの魅力だと思いました。"],appeal_custom:["一人ひとりに合わせて見てもらえるところが良かったです。"],appeal_body:["身体の悩みに合わせて取り組めるところが魅力だと感じました。"],appeal_continue:["無理なく続けやすそうな環境だと思いました。"],appeal_support:["丁寧に見てもらえるので安心して取り組めました。"],appeal_woman:["女性が通いやすい雰囲気も魅力だと感じました。"],appeal_calm:["落ち着いて自分の身体と向き合える時間になりました。"],appeal_change:["続けることで身体の変化を目指せそうだと思いました。"],
+future_continue:["これからも続けて通いたいです。"],future_diet:["ダイエットも引き続き頑張りたいです。"],future_waist:["くびれづくりを目指して続けたいです。"],future_posture:["姿勢改善を目指して続けていきたいです。"],future_body:["これからさらに身体が変わっていくのが楽しみです。"],future_health:["健康維持のためにも続けたいです。"],future_recommend:["同じような悩みがある友人にもおすすめしたいです。"]};
+
+let rating=0;
+const stars=document.getElementById("stars");
+const ratingLabel=document.getElementById("ratingLabel");
+
+for(let i=1;i<=5;i++){
+  const b=document.createElement("button");
+  b.className="star";
+  b.textContent="★";
+  b.onclick=()=>{
+    rating=i;
+    [...stars.children].forEach((x,j)=>x.classList.toggle("on",j<i));
+    ratingLabel.textContent="★"+i;
+    const positive=document.getElementById("positiveFlow");
+    const feedback=document.getElementById("feedbackFlow");
+    document.getElementById("resultCard").style.display="none";
+    if(i>=4){feedback.style.display="none";positive.style.display="block";}
+    else{positive.style.display="none";feedback.style.display="block";}
+  };
+  stars.appendChild(b);
+}
+
+const q=document.getElementById("questions");
+categories.forEach(cat=>{
+  const s=document.createElement("section");s.className="card";
+  const h=document.createElement("h2");h.className="title";h.textContent=cat.name;s.appendChild(h);
+  const n=document.createElement("p");n.className="note";n.textContent="当てはまるものを最大"+cat.max+"つまで選択";s.appendChild(n);
+  const c=document.createElement("div");c.className="chips";
+  cat.items.forEach(([id,label])=>{
+    const b=document.createElement("button");b.className="chip";b.textContent=label;b.dataset.id=id;
+    b.onclick=()=>{
+      const selected=c.querySelectorAll(".selected");
+      if(!b.classList.contains("selected")&&selected.length>=cat.max)return;
+      b.classList.toggle("selected");
+    };
+    c.appendChild(b);
+  });
+  s.appendChild(c);q.appendChild(s);
+});
+
+function selected(){return[...document.querySelectorAll(".chip.selected")].map(x=>x.dataset.id)}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function build(){
+  const ids=selected();
+  if(ids.length<3)throw Error("感想について、合計3つ以上選択してください。");
+  const purpose=ids.filter(x=>x.startsWith("purpose_"));
+  const future=ids.filter(x=>x.startsWith("future_"));
+  const body=ids.filter(x=>!x.startsWith("purpose_")&&!x.startsWith("future_"));
+  let parts=[];
+  if(purpose.length)parts.push(pick(phrases[pick(purpose)]));
+  else parts.push("Pilachéのレッスンを体験しました。");
+  body.sort(()=>Math.random()-.5).slice(0,5).forEach(x=>{if(phrases[x])parts.push(pick(phrases[x]));});
+  const free=document.getElementById("freeText").value.trim();
+  if(free)parts.push(/[。！？!?]$/.test(free)?free:free+"。");
+  if(future.length)parts.push(pick(phrases[pick(future)]));
+  return parts.join("");
+}
+function update(){document.getElementById("charCount").textContent=document.getElementById("reviewText").innerText.trim().length+"文字"}
+
+document.getElementById("generateBtn").onclick=()=>{
+  document.getElementById("error").textContent="";
+  try{
+    document.getElementById("reviewText").textContent=build();
+    document.getElementById("resultCard").style.display="block";
+    update();
+    document.getElementById("resultCard").scrollIntoView({behavior:"smooth"});
+  }catch(e){document.getElementById("error").textContent=e.message;}
+};
+document.getElementById("regenBtn").onclick=()=>{try{document.getElementById("reviewText").textContent=build();update();}catch(e){document.getElementById("error").textContent=e.message;}}
+document.getElementById("reviewText").oninput=update;
+document.getElementById("copyBtn").onclick=async()=>{
+  const t=document.getElementById("reviewText").innerText.trim();
+  try{await navigator.clipboard.writeText(t);document.getElementById("copyMessage").textContent="コピーしました。Google口コミ画面で貼り付けてください。";}
+  catch(e){document.getElementById("copyMessage").textContent="コピーできませんでした。文章を長押ししてコピーしてください。";}
+};
+document.getElementById("googleBtn").onclick=()=>window.open(GOOGLE_REVIEW_URL,"_blank","noopener,noreferrer");
+</script>
+</body>
+</html>
