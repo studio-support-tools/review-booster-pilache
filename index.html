@@ -230,6 +230,14 @@ document.getElementById("confirmRating").onclick=()=>{
     alert("満足度を選択してください");
     return;
   }
+// 確定後は星評価を変更できないようにする
+document.getElementById("stars").style.pointerEvents = "none";
+document.getElementById("stars").style.opacity = "0.65";
+
+// 確定ボタンを無効化する
+const confirmBtn = document.getElementById("confirmRating");
+confirmBtn.disabled = true;
+confirmBtn.textContent = "満足度を確定しました";
 
   const positive=document.getElementById("positiveFlow");
   const feedback=document.getElementById("feedbackFlow");
