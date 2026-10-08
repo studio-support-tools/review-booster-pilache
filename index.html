@@ -71,6 +71,11 @@ footer{margin-top:22px;text-align:center;color:var(--muted);font-size:11px;line-
 <p class="note">星をタップしてください</p>
 <div id="stars" class="stars"></div>
 <div id="ratingLabel" class="rating-label">未選択</div>
+  
+<button id="confirmRating" class="btn primary">
+  満足度を確定する
+</button>
+  
 </section>
 
 <div id="feedbackFlow">
@@ -152,16 +157,17 @@ for(let i=1;i<=5;i++){
   const b=document.createElement("button");
   b.className="star";
   b.textContent="★";
-  b.onclick=()=>{
-    rating=i;
-    [...stars.children].forEach((x,j)=>x.classList.toggle("on",j<i));
-    ratingLabel.textContent="★"+i;
-    const positive=document.getElementById("positiveFlow");
-    const feedback=document.getElementById("feedbackFlow");
-    document.getElementById("resultCard").style.display="none";
-    if(i>=4){feedback.style.display="none";positive.style.display="block";}
-    else{positive.style.display="none";feedback.style.display="block";}
-  };
+ b.onclick=()=>{
+  rating=i;
+  [...stars.children].forEach((x,j)=>
+    x.classList.toggle("on",j<i)
+  );
+  ratingLabel.textContent="★"+i;
+
+  document.getElementById("positiveFlow").style.display="none";
+  document.getElementById("feedbackFlow").style.display="none";
+  document.getElementById("resultCard").style.display="none";
+};
   stars.appendChild(b);
 }
 
@@ -219,6 +225,25 @@ document.getElementById("copyBtn").onclick=async()=>{
   catch(e){document.getElementById("copyMessage").textContent="コピーできませんでした。文章を長押ししてコピーしてください。";}
 };
 document.getElementById("googleBtn").onclick=()=>window.open(GOOGLE_REVIEW_URL,"_blank","noopener,noreferrer");
+document.getElementById("confirmRating").onclick=()=>{
+  if(rating===0){
+    alert("満足度を選択してください");
+    return;
+  }
+
+  const positive=document.getElementById("positiveFlow");
+  const feedback=document.getElementById("feedbackFlow");
+
+  if(rating>=4){
+    feedback.style.display="none";
+    positive.style.display="block";
+    positive.scrollIntoView({behavior:"smooth"});
+  }else{
+    positive.style.display="none";
+    feedback.style.display="block";
+    feedback.scrollIntoView({behavior:"smooth"});
+  }
+};
 </script>
 </body>
 </html>
